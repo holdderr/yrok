@@ -1,10 +1,14 @@
 
-class UnitOfWork:
-    def commit(self):
-        transaction.commit()
-
-    def rollback(self):
-        transaction.rollback()
+def make_transaction(func: callable):
+    def transaction_wrapper(*args, **kwargs):
+        transaction = db.begin_transaction
+        try:
+            result = func(*args,**kwargs)
+            transaction.commit()
+            return result
+        except Exception as exc:
+            transaction.rollback()
+            raise exc
 
 class UserRepository:
     def save(self, obj):
@@ -14,13 +18,7 @@ class BalanceRepository:
     def save(self, obj):
         obj.save()
 
-def make_vip_user():
-    unit_of_work = UnitOfWork
-    user_repository = UserRepository
-    balance_repository = BalanceRepository
 
-    with UnitOfWork() as unit_of_work:
-        user_repository.save(user)
-        balance_repository.save(balance)
-        unit_of_work.commit()
+@transaction
+def make_vip_user():
 
