@@ -8,4 +8,4 @@ def index(request):
 
 
 def about(request):
-    return HttpResponse("<h4>when you finally saw it come<h4>")
+    return render(request, 'main/about.html')
